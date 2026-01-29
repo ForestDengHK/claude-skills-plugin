@@ -42,7 +42,7 @@ That's it! The `name` field is the only required field.
 - Must be unique across installed plugins
 - Use kebab-case (lowercase with hyphens)
 - No spaces or special characters
-- Used in installation command: `claude /install-plugin github:user/my-plugin-name`
+- Used when installing: `/plugin install my-plugin-name`
 
 ### version
 

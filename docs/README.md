@@ -9,13 +9,15 @@ Welcome to the FD Skills plugin documentation.
 | [Installation Guide](installation.md) | How to install and configure the plugin |
 | [Plugin Structure](plugin-structure.md) | Understanding the directory layout |
 | [Plugin.json Reference](plugin-json.md) | All manifest configuration options |
+| [Marketplace.json Reference](marketplace-json.md) | Marketplace distribution configuration |
 | [Components Guide](components.md) | Skills, commands, agents, hooks, MCP servers |
 
 ## Getting Started
 
 1. **Install the plugin:**
-   ```bash
-   claude /install-plugin github:ForestDengHK/claude-skills-plugin
+   ```
+   /plugin marketplace add ForestDengHK/claude-skills-plugin
+   /plugin install fd-skills
    ```
 
 2. **Configure API keys:**

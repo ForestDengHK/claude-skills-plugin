@@ -4,49 +4,49 @@ How to install and manage Claude Code plugins.
 
 ## Installing This Plugin
 
-### From GitHub
+### From GitHub Marketplace (Recommended)
 
-```bash
-claude /install-plugin github:ForestDengHK/claude-skills-plugin
+Inside Claude Code, run:
+
+```
+/plugin marketplace add ForestDengHK/claude-skills-plugin
+/plugin install fd-skills
 ```
 
-### From Local Directory
+Or use the interactive menu:
+1. Run `/plugin`
+2. Select "Add Marketplace"
+3. Enter: `ForestDengHK/claude-skills-plugin`
+4. Then install `fd-skills` from the marketplace list
+
+### From Local Directory (Development)
 
 ```bash
-claude /install-plugin /path/to/claude-skills-plugin
+claude --plugin-dir /path/to/claude-skills-plugin
 ```
 
 ## Managing Plugins
 
 ### List Installed Plugins
 
-```bash
-claude /plugins
+Inside Claude Code:
+```
+/plugin
 ```
 
 ### Enable/Disable a Plugin
 
-```bash
-# Disable
-claude /disable-plugin fd-skills
-
-# Enable
-claude /enable-plugin fd-skills
-```
+Use the `/plugin` menu to enable or disable plugins.
 
 ### Uninstall a Plugin
 
-```bash
-claude /uninstall-plugin fd-skills
-```
+Use the `/plugin` menu to uninstall plugins.
 
 ### Update a Plugin
 
-```bash
-# Uninstall and reinstall
-claude /uninstall-plugin fd-skills
-claude /install-plugin github:ForestDengHK/claude-skills-plugin
-```
+1. Remove the marketplace: `/plugin marketplace remove fd-skills-marketplace`
+2. Re-add it: `/plugin marketplace add ForestDengHK/claude-skills-plugin`
+3. Reinstall: `/plugin install fd-skills`
 
 ## Post-Installation Setup
 
@@ -108,7 +108,7 @@ Error: Plugin not found
 ### Skills Not Loading
 
 **Possible causes:**
-1. Plugin not enabled - run `claude /enable-plugin fd-skills`
+1. Plugin not enabled - use `/plugin` menu to enable
 2. Restart Claude Code after installation
 3. Check skill files have correct `SKILL.md` naming
 
@@ -139,7 +139,11 @@ chmod 600 ~/.claude-skills/.env
 To use the same plugin on another computer:
 
 1. Install Claude Code
-2. Run: `claude /install-plugin github:ForestDengHK/claude-skills-plugin`
+2. Inside Claude Code, run:
+   ```
+   /plugin marketplace add ForestDengHK/claude-skills-plugin
+   /plugin install fd-skills
+   ```
 3. Configure API keys in `~/.claude-skills/.env`
 
 The plugin installs from GitHub, so all machines get the same version.

@@ -8,7 +8,8 @@ This document explains the complete structure of a Claude Code plugin.
 plugin-name/
 │
 ├── .claude-plugin/              # REQUIRED: Plugin config directory
-│   └── plugin.json              # REQUIRED: Plugin manifest (only required file)
+│   ├── plugin.json              # REQUIRED: Plugin manifest (only required file)
+│   └── marketplace.json         # OPTIONAL: For marketplace distribution
 │
 ├── skills/                      # Auto-discovered skills directory
 │   ├── skill-one/
