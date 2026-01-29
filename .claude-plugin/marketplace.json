@@ -1,0 +1,11 @@
+{
+  "name": "FD Skills Marketplace",
+  "description": "A collection of Claude Code skills for AI image generation and article illustration",
+  "plugins": [
+    {
+      "name": "fd-skills",
+      "description": "AI image generation, article illustration, and AI news research skills",
+      "path": "."
+    }
+  ]
+}
