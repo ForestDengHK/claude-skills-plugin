@@ -1,6 +1,6 @@
 # FD Skills - Claude Code Plugin
 
-A collection of 21 Claude Code skills for productivity, AI image generation, content creation, and more.
+A collection of Claude Code skills for AI image generation and article illustration.
 
 ## Installation
 
@@ -12,27 +12,9 @@ claude /install-plugin github:ForestDengHK/claude-skills-plugin
 
 | Skill | Description |
 |-------|-------------|
-| `agent-browser` | Automates browser interactions for web testing, form filling, screenshots |
-| `ai-news-to-blog` | Research AI news and draft blog posts |
-| `article-illustrator` | Analyze articles and generate illustrations with Type × Style |
-| `changelog-generator` | Create user-facing changelogs from git commits |
-| `competitive-ads-extractor` | Extract and analyze competitors' ads from ad libraries |
-| `content-research-writer` | Research and write high-quality content with citations |
-| `developer-growth-analysis` | Analyze coding patterns and identify areas for improvement |
-| `domain-name-brainstormer` | Generate creative domain name ideas and check availability |
-| `file-organizer` | Intelligently organize files and folders |
-| `image-enhancer` | Improve image quality - resolution, sharpness, clarity |
 | `image-gen` | AI image generation with Google/OpenAI/DashScope APIs |
-| `invoice-organizer` | Organize invoices and receipts for tax preparation |
-| `lead-research-assistant` | Identify high-quality leads for your business |
-| `meeting-insights-analyzer` | Analyze meeting transcripts for insights and feedback |
-| `planning-with-files` | Use markdown files for planning and progress tracking |
-| `raffle-winner-picker` | Pick random winners from lists for giveaways |
-| `react-best-practices` | React and Next.js performance optimization guidelines |
-| `skill-share` | Create and share Claude skills on Slack |
-| `smart-commit` | Generate conventional commit messages with proper scope |
-| `template-skill` | Template for creating new skills |
-| `video-downloader` | Download videos from YouTube and other platforms |
+| `article-illustrator` | Analyze articles and generate illustrations with Type × Style |
+| `ai-news-to-blog` | Research AI news and draft blog posts |
 
 ## Configuration
 
@@ -89,6 +71,21 @@ See the [docs/](docs/) folder for detailed documentation:
 - [Plugin Structure](docs/plugin-structure.md)
 - [Plugin.json Reference](docs/plugin-json.md)
 - [Components Guide](docs/components.md)
+
+## Installing Individual Skills
+
+If you want to install skills individually (without the full plugin), you can manually copy them:
+
+```bash
+# Clone the repo
+git clone https://github.com/ForestDengHK/claude-skills-plugin.git /tmp/fd-skills
+
+# Copy only the skill you want
+cp -r /tmp/fd-skills/skills/image-gen ~/.claude/skills/
+
+# Clean up
+rm -rf /tmp/fd-skills
+```
 
 ## License
 
