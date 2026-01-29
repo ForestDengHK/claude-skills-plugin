@@ -5,7 +5,7 @@ A collection of Claude Code skills for AI image generation and article illustrat
 ## Installation
 
 ```bash
-claude /install-plugin github:forestdeng/claude-skills-plugin
+claude /install-plugin github:ForestDengHK/claude-skills-plugin
 ```
 
 ## Skills Included

@@ -161,7 +161,7 @@ Override default component locations:
     "url": "https://forestdeng.com"
   },
 
-  "repository": "https://github.com/forestdeng/claude-skills-plugin",
+  "repository": "https://github.com/ForestDengHK/claude-skills-plugin",
   "homepage": "https://forestdeng.com/claude-skills",
   "license": "MIT",
 

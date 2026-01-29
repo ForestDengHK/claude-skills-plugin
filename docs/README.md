@@ -15,7 +15,7 @@ Welcome to the FD Skills plugin documentation.
 
 1. **Install the plugin:**
    ```bash
-   claude /install-plugin github:forestdeng/claude-skills-plugin
+   claude /install-plugin github:ForestDengHK/claude-skills-plugin
    ```
 
 2. **Configure API keys:**
@@ -69,5 +69,5 @@ If you want to create your own plugins, read:
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/forestdeng/claude-skills-plugin/issues)
-- **Source:** [GitHub Repository](https://github.com/forestdeng/claude-skills-plugin)
+- **Issues:** [GitHub Issues](https://github.com/ForestDengHK/claude-skills-plugin/issues)
+- **Source:** [GitHub Repository](https://github.com/ForestDengHK/claude-skills-plugin)

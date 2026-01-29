@@ -6,7 +6,7 @@
     "name": "Forest Deng",
     "email": "forest.jinying.denghk@outlook.com"
   },
-  "repository": "https://github.com/forestdeng/claude-skills-plugin",
+  "repository": "https://github.com/ForestDengHK/claude-skills-plugin",
   "license": "MIT",
   "keywords": ["image-generation", "article-illustration", "ai-news", "gemini", "openai"]
 }

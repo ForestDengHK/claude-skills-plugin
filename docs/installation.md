@@ -7,7 +7,7 @@ How to install and manage Claude Code plugins.
 ### From GitHub
 
 ```bash
-claude /install-plugin github:forestdeng/claude-skills-plugin
+claude /install-plugin github:ForestDengHK/claude-skills-plugin
 ```
 
 ### From Local Directory
@@ -45,7 +45,7 @@ claude /uninstall-plugin fd-skills
 ```bash
 # Uninstall and reinstall
 claude /uninstall-plugin fd-skills
-claude /install-plugin github:forestdeng/claude-skills-plugin
+claude /install-plugin github:ForestDengHK/claude-skills-plugin
 ```
 
 ## Post-Installation Setup
@@ -139,7 +139,7 @@ chmod 600 ~/.claude-skills/.env
 To use the same plugin on another computer:
 
 1. Install Claude Code
-2. Run: `claude /install-plugin github:forestdeng/claude-skills-plugin`
+2. Run: `claude /install-plugin github:ForestDengHK/claude-skills-plugin`
 3. Configure API keys in `~/.claude-skills/.env`
 
 The plugin installs from GitHub, so all machines get the same version.
