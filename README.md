@@ -4,8 +4,41 @@ A collection of Claude Code skills for AI image generation and article illustrat
 
 ## Installation
 
+### Option 1: Via Marketplace (Recommended)
+
+Inside Claude Code, run:
+```
+/plugin marketplace add ForestDengHK/claude-skills-plugin
+/plugin install fd-skills
+```
+
+Or use the interactive menu:
+1. Run `/plugin`
+2. Select "Add Marketplace"
+3. Enter: `ForestDengHK/claude-skills-plugin`
+4. Then install `fd-skills` from the marketplace list
+
+### Option 2: Load Directly (Development)
+
 ```bash
-claude /install-plugin github:ForestDengHK/claude-skills-plugin
+# Clone the repo
+git clone https://github.com/ForestDengHK/claude-skills-plugin.git ~/claude-skills-plugin
+
+# Start Claude Code with the plugin
+claude --plugin-dir ~/claude-skills-plugin
+```
+
+### Option 3: Copy Individual Skills
+
+```bash
+# Clone the repo
+git clone https://github.com/ForestDengHK/claude-skills-plugin.git /tmp/fd-skills
+
+# Copy only the skill you want
+cp -r /tmp/fd-skills/skills/image-gen ~/.claude/skills/
+
+# Clean up
+rm -rf /tmp/fd-skills
 ```
 
 ## Skills Included
@@ -44,23 +77,20 @@ EOF
 
 ```bash
 # Simple image
-/image-gen --prompt "A sunset over mountains" --image sunset.png
+/fd-skills:image-gen --prompt "A sunset over mountains" --image sunset.png
 
 # With aspect ratio
-/image-gen --prompt "A landscape" --image landscape.png --ar 16:9
-
-# High quality for diagrams
-/image-gen --prompt "System architecture diagram" --image arch.png --quality 2k --imageSize 4K
+/fd-skills:image-gen --prompt "A landscape" --image landscape.png --ar 16:9
 ```
 
 ### Illustrate Articles
 
 ```bash
 # Auto-analyze and illustrate
-/article-illustrator path/to/article.md
+/fd-skills:article-illustrator path/to/article.md
 
 # Specify style
-/article-illustrator article.md --type infographic --style blueprint
+/fd-skills:article-illustrator article.md --type infographic --style blueprint
 ```
 
 ## Documentation
@@ -71,21 +101,6 @@ See the [docs/](docs/) folder for detailed documentation:
 - [Plugin Structure](docs/plugin-structure.md)
 - [Plugin.json Reference](docs/plugin-json.md)
 - [Components Guide](docs/components.md)
-
-## Installing Individual Skills
-
-If you want to install skills individually (without the full plugin), you can manually copy them:
-
-```bash
-# Clone the repo
-git clone https://github.com/ForestDengHK/claude-skills-plugin.git /tmp/fd-skills
-
-# Copy only the skill you want
-cp -r /tmp/fd-skills/skills/image-gen ~/.claude/skills/
-
-# Clean up
-rm -rf /tmp/fd-skills
-```
 
 ## License
 
