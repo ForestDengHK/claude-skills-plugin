@@ -120,6 +120,10 @@ Before drafting, read 2-3 recent posts from the blog to match:
 
 Reference posts location: `/home/demouser/projects/fd-blog/posts/ai/`
 
+Default behavior:
+- If the user does not specify a blog path, use the default blog root at `/home/demouser/projects/fd-blog`
+- If the user explicitly provides a different path, use the user-provided path instead
+
 ### 3.2 Writing Style Guidelines
 
 **For Technical Posts:**
@@ -208,9 +212,9 @@ published: false
 
 **Generate cover:**
 ```bash
-npx -y bun ~/.claude/skills/image-gen/scripts/main.ts \
+npx -y bun ~/.codex/skills/image-gen/scripts/main.ts \
   --prompt "[cover prompt based on article topic]" \
-  --image /home/demouser/projects/fd-blog/public/covers/YYYYMMDD_[slug].png \
+  --image "$BLOG_ROOT/public/covers/YYYYMMDD_[slug].png" \
   --ar 16:9 --quality 2k
 ```
 
@@ -220,7 +224,7 @@ npx -y bun ~/.claude/skills/image-gen/scripts/main.ts \
 
 Follow article-illustrator workflow to:
 1. Analyze post for illustration positions
-2. Generate appropriate images to **public/images/YYYYMMDD_[slug]/** folder
+2. Generate appropriate images to **$BLOG_ROOT/public/images/YYYYMMDD_[slug]/** folder
 3. Insert image references into the post
 
 **Recommended settings for AI news posts:**
@@ -258,8 +262,8 @@ rm input.png
 - Article images without text: < 150KB
 
 **Image Output Locations (all WebP):**
-- Cover image: `/home/demouser/projects/fd-blog/public/covers/YYYYMMDD_[slug].webp`
-- Article images: `/home/demouser/projects/fd-blog/public/images/YYYYMMDD_[slug]/`
+- Cover image: `$BLOG_ROOT/public/covers/YYYYMMDD_[slug].webp`
+- Article images: `$BLOG_ROOT/public/images/YYYYMMDD_[slug]/`
 
 ---
 
@@ -310,7 +314,7 @@ If any PNG/JPG remain, convert now using Step 4.3 commands.
 ### 5.4 Output Structure
 
 ```
-/home/demouser/projects/fd-blog/
+$BLOG_ROOT/
 ├── posts/ai/[category]/
 │   └── YYYYMMDD_[slug].mdx              # The blog post
 ├── public/
@@ -386,9 +390,9 @@ When user invokes this skill:
 
 7. **Report completion:**
    ```
-   Post saved to: /home/demouser/projects/fd-blog/posts/ai/[category]/YYYYMMDD_[slug].mdx
-   Cover: /home/demouser/projects/fd-blog/public/covers/YYYYMMDD_[slug].webp
-   Images: /home/demouser/projects/fd-blog/public/images/YYYYMMDD_[slug]/
+   Post saved to: $BLOG_ROOT/posts/ai/[category]/YYYYMMDD_[slug].mdx
+   Cover: $BLOG_ROOT/public/covers/YYYYMMDD_[slug].webp
+   Images: $BLOG_ROOT/public/images/YYYYMMDD_[slug]/
 
    To publish:
    1. Review the post in your IDE or browser (pnpm dev)

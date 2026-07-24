@@ -239,7 +239,7 @@ Follow [references/prompt-construction.md](references/prompt-construction.md). S
 
 **5.2 Select Generation Skill**
 
-Check available skills. Preferred skill: `image-gen`. If multiple image generation skills available, ask user.
+**REQUIRED**: Use `image-gen` skill from this marketplace. In Codex, invoke it by name as `image-gen`. Do NOT use `web-image-gen` or other image generation skills.
 
 **5.3 Apply Watermark** (if enabled)
 

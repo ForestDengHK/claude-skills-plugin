@@ -12,6 +12,7 @@ Official API-based image generation. Supports OpenAI, Google and DashScope (é˜¿é
 **Agent Execution**:
 1. `SKILL_DIR` = this SKILL.md file's directory
 2. Script path = `${SKILL_DIR}/scripts/main.ts`
+3. Use `npx -y bun` to run the script. A global `bun` install is optional and not required.
 
 ## Preferences (EXTEND.md)
 
