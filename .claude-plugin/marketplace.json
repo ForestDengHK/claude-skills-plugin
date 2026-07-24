@@ -1,7 +1,7 @@
 {
   "name": "fd-skills-marketplace",
   "version": "1.0.0",
-  "description": "Forest Deng's Claude Code plugins: engagement-os (consulting delivery operating system), fd-skills (AI image / illustration skills)",
+  "description": "A collection of Claude Code skills for AI image generation and article illustration",
   "owner": {
     "name": "Forest Deng",
     "email": "forest.jinying.denghk@outlook.com"
@@ -11,12 +11,6 @@
       "name": "fd-skills",
       "description": "AI image generation, article illustration, and AI news research skills",
       "source": "./",
-      "category": "productivity"
-    },
-    {
-      "name": "engagement-os",
-      "description": "Delivery operating system for document-heavy consulting engagements: scaffold → ingest → canonicalize → findings → validate → build, with panel review gate. 8 skills + playbooks + templates + scripts.",
-      "source": "./engagement-os",
       "category": "productivity"
     }
   ]
