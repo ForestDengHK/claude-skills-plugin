@@ -1,6 +1,6 @@
 ---
 name: ai-news-to-blog
-description: Use when researching latest AI/Data news and drafting blog posts. Triggers on requests like "find AI news", "research AI updates", "draft AI blog post", "what's new in AI", or weekly AI content curation.
+description: Use when drafting a blog post about AI/Data — either by researching the latest news, or by turning supplied material (a chat transcript, session log, debugging write-up, personal experience, or a specific article) into a post. Triggers on "find AI news", "research AI updates", "draft AI blog post", "what's new in AI", weekly AI content curation, and equally on "write this up as a post", "turn this transcript into a blog post", "把这个整理成一篇博文".
 ---
 
 # AI News to Blog
@@ -14,21 +14,101 @@ digraph workflow {
     rankdir=TB;
 
     "Start" [shape=ellipse];
+    "Step 0: Classify Source" [shape=diamond];
     "Step 1: Research" [shape=box];
     "Step 2: Analyze & Select" [shape=box];
+    "Step 0b: Extract Facts" [shape=box];
     "Step 3: Draft Post" [shape=box];
     "Step 4: Illustrate" [shape=box];
     "Step 5: Save to Blog" [shape=box];
+    "Step 6: Read-Through Gate" [shape=box];
     "Done" [shape=ellipse];
 
-    "Start" -> "Step 1: Research";
+    "Start" -> "Step 0: Classify Source";
+    "Step 0: Classify Source" -> "Step 1: Research" [label="web news"];
+    "Step 0: Classify Source" -> "Step 0b: Extract Facts" [label="user-supplied material"];
     "Step 1: Research" -> "Step 2: Analyze & Select";
     "Step 2: Analyze & Select" -> "Step 3: Draft Post";
+    "Step 0b: Extract Facts" -> "Step 3: Draft Post";
     "Step 3: Draft Post" -> "Step 4: Illustrate";
     "Step 4: Illustrate" -> "Step 5: Save to Blog";
-    "Step 5: Save to Blog" -> "Done";
+    "Step 5: Save to Blog" -> "Step 6: Read-Through Gate";
+    "Step 6: Read-Through Gate" -> "Done";
 }
 ```
+
+---
+
+## Step 0: Classify the Source (DO THIS FIRST)
+
+There are two entry paths. Picking the wrong one is the most expensive mistake in this
+workflow, because Steps 1-2 assume you are hunting for material you have not seen yet.
+
+| Input | Path |
+|---|---|
+| "find AI news", "what's new", weekly curation | **Web path** → Step 1 |
+| User attaches a transcript, chat log, notes, their own experience, or a specific article | **Supplied-material path** → Step 0b, then skip to Step 3 |
+| User's own life: memories, places, music, emotional reflections, in messy spoken style | **Not this skill** → use `oral-to-memoir` instead |
+
+Boundary with `oral-to-memoir`: that skill owns personal-life content destined to become
+散文 (memoir essays). This skill's supplied-material path owns technical/AI material —
+experiment logs, debugging sessions, claims to verify, articles to respond to. If the
+material is the user's life, stop here and switch skills; if it is the user's *work*,
+continue.
+
+On the supplied-material path, **skip Step 1/2 candidate hunting** — the material is the
+source of truth for the narrative; your job is fidelity, not discovery.
+
+**Exception: verify external factual claims independently.** Step 1/2 exist to find
+*topics*; they say nothing about fact-checking. Any third-party claim the article will
+rely on or argue against (vendor numbers, CLI budgets, API limits, dates) still gets
+verified against primary sources — web research included. Supplied material tells you
+what the story is; it does not make its embedded claims true.
+
+---
+
+## Step 0b: Extract Facts Before Outlining (supplied-material path only)
+
+**Do not write an outline from your mental summary of the material.** Paraphrase drifts,
+and every drift becomes a rewrite later. Build a fact sheet first, quoting the source.
+
+**Do not pick a slug yet.** The thesis is still forming, and a slug chosen now will
+contradict the finished article (see Step 6.3). Use a provisional working folder
+`pre-post/YYYYMMDD_wip/` and rename it at Step 5.2 once the conclusion is settled.
+
+Write `pre-post/YYYYMMDD_wip/facts.md`:
+
+```markdown
+## 被反驳/被讨论的主张（逐字引用，不要转述）
+> "<exact sentence from the source>"
+- 是泛指还是有具体对象？谁是被告？有没有对照组？
+- 是观察值（"涨到了 X"）还是建议阈值（"别超过 X"）？这两者的反驳方式完全不同。
+
+## 方法（谁做了什么，按顺序）
+- 谁出题 / 谁答题 / 谁判卷？三者是否是同一个主体？
+- 每一轮为什么作废？换了什么变量？
+
+## 数字（照抄，带单位和上下文）
+| 数字 | 含义 | 出处 |
+
+## 时间线
+## 明确没有被测到 / 没有被证明的部分
+```
+
+**Confirm with AskUserQuestion before drafting — but only when the stakes warrant it.**
+
+Ask when ANY of these holds:
+- the article will argue against a claim (scope errors here flip the whole piece)
+- the material describes an experiment or multi-actor process (roles get confused)
+- the article's argument depends on specific numbers (measurement vs recommendation)
+
+Ask about the 3-5 facts where a misreading would change the whole article. For simple
+experience write-ups or short memos with no contested claims, skip the confirmation —
+facts.md is still worth writing, but don't make the user grade it.
+
+Cheap to ask when it matters. Misreading a claim's scope (e.g. flattening "X can't, Y can"
+into "nothing can") silently deletes the article's most valuable finding and costs a
+full rewrite.
 
 ---
 
@@ -110,19 +190,43 @@ Present top 5 to user with analysis:
 
 ## Step 3: Draft Blog Post
 
-### 3.1 Read Existing Blog Style
+### 3.1 Calibrate Style Against Real Posts (BEFORE writing a single line)
 
-Before drafting, read 2-3 recent posts from the blog to match:
-- Tone (technical but accessible)
-- Structure (clear headers, code blocks where relevant)
-- Length (typically 800-1500 words)
-- Language (English or Chinese based on topic)
+**Resolve the blog root first** — never hardcode it. In order: the path the user gave →
+the repo you were invoked in → `CLAUDE.md` in that repo. Do not assume `/home/demouser/…`
+or any other machine's layout.
 
-Reference posts location: `/home/demouser/projects/fd-blog/posts/ai/`
+```bash
+# find recent posts in the SAME LANGUAGE you are about to write in
+grep -rl '^description: "[^"]*[一-鿿]' --include='*.mdx' posts   # Chinese posts
+grep -rL '^description: "[^"]*[一-鿿]' --include='*.mdx' posts   # English posts
+```
 
-Default behavior:
-- If the user does not specify a blog path, use the default blog root at `/home/demouser/projects/fd-blog`
-- If the user explicitly provides a different path, use the user-provided path instead
+**Read 4 recent posts in the target language** — not 2-3, and not whichever ones are
+newest regardless of language. Voice does not transfer across languages.
+
+**If the target blog root has no published posts yet** (fresh scaffold, test fixture),
+style-spec is still required — fall back to reading posts from the repo you were invoked
+in (or the user's main blog), and note in style-spec.md where the samples came from.
+An empty target is never a reason to skip calibration.
+
+Then write `pre-post/YYYYMMDD_wip/style-spec.md` with concrete, checkable values:
+
+| Dimension | Capture |
+|---|---|
+| Paragraph length | typical lines per paragraph; do they use one-line paragraphs as beats? |
+| Section headers | plain and descriptive, or framed/clever? quote 3 real ones |
+| Technical density | do they name real APIs/flags/numbers, or abstract them away? quote an example |
+| Humor register | quote the funniest line in the sample. Is it a joke, or deadpan honesty? |
+| Opening move | how does the first paragraph start? |
+| Closing move | quote the last line of 2 posts |
+
+**Two failure modes this prevents, both observed:**
+- Writing flat/monotone because you never absorbed the author's rhythm.
+- Over-correcting a style note into an extreme. "Make it understandable to non-technical
+  readers" does **not** mean deleting the API names, numbers, and commands — it means
+  *naming the real thing, then adding one clause of plain-language explanation*. Check the
+  technical-density row before you strip anything out.
 
 ### 3.2 Writing Style Guidelines
 
@@ -191,56 +295,105 @@ published: false
 
 ### 3.4 Language Selection
 
+**Check what the blog can actually do before offering options.** Grep for `lang` /
+`locale` / `i18n` handling and for an `alternates.languages` (hreflang) map in the post
+metadata. If there is none, "bilingual" is not a feature — it is two separate posts that
+will both appear in the post list, RSS, and sitemap as near-duplicates.
+
 **Use AskUserQuestion:**
-- English (Recommended for international topics)
-- Chinese 中文 (For CN-focused topics or CN sources)
-- Bilingual (Both versions)
+- English (for international topics)
+- Chinese 中文 (for CN-focused topics or CN sources)
+- Bilingual — **only offer this with the mechanics spelled out**: two independent MDX files
+  with distinct slugs plus a manual cross-link line, unless i18n exists in the repo.
+
+Default to a single language when the post continues a series already written in that
+language — the callback to the earlier post matters more than reach.
 
 ---
 
 ## Step 4: Illustrate the Post
 
-### 4.1 Generate Cover Image (REQUIRED)
+### 4.1 Two-Tier Cost Optimization
 
-**Every post needs a cover image.** Generate before article illustrations.
+**Use different providers for different image types** to reduce costs by 80%+:
+
+| Image Type | Provider | Cost | When to Use |
+|------------|----------|------|-------------|
+| Cover (no text) | Replicate FLUX | $0.003 | Abstract, atmospheric, visual-only |
+| Diagrams/infographics | Google Gemini | $0.039 | Any image with text labels |
+
+**Rule**: If the image has readable text → Google. If purely visual → Replicate.
+
+### 4.2 Generate Cover Image (REQUIRED)
+
+**Every post needs a cover image.** Generate FIRST using Replicate (13x cheaper).
 
 **Cover prompt guidelines:**
 - Abstract/conceptual representation of the topic
 - Suitable for social sharing (will be cropped to various ratios)
 - Clean, professional aesthetic matching blog style
-- No text in the image (title overlays handled by blog)
+- **No text in the image** (title overlays handled by blog) → Use Replicate
 
-**Generate cover:**
+**Generate cover with Replicate FLUX ($0.003):**
 ```bash
-npx -y bun ~/.codex/skills/image-gen/scripts/main.ts \
-  --prompt "[cover prompt based on article topic]" \
-  --image "$BLOG_ROOT/public/covers/YYYYMMDD_[slug].png" \
-  --ar 16:9 --quality 2k
+npx -y bun ~/.claude/plugins/cache/fd-skills-marketplace/fd-skills/1.0.0/skills/image-gen/scripts/main.ts \
+  --prompt "[abstract visual prompt, no text]" \
+  --image $BLOG_ROOT/public/covers/YYYYMMDD_[slug].webp \
+  --provider replicate --ar 16:9
 ```
 
-### 4.2 Generate Article Illustrations
+### 4.3 Generate Article Illustrations
 
-**Invoke skill:** `article-illustrator`
+**Invoke skill:** `article-illustrator` OR generate directly with image-gen
 
-Follow article-illustrator workflow to:
-1. Analyze post for illustration positions
-2. Generate appropriate images to **$BLOG_ROOT/public/images/YYYYMMDD_[slug]/** folder
-3. Insert image references into the post
+For diagrams/infographics with text labels, use Google at 1K ($0.039 each):
+```bash
+npx -y bun ~/.claude/plugins/cache/fd-skills-marketplace/fd-skills/1.0.0/skills/image-gen/scripts/main.ts \
+  --prompt "[diagram with labeled components]" \
+  --image $BLOG_ROOT/public/images/YYYYMMDD_[slug]/01-infographic-xxx.png
+```
+Note: 1K source resolution is default and sufficient - after WebP compression to 1600px, quality is indistinguishable from 2K.
 
 **Recommended settings for AI news posts:**
 - Type: `infographic` or `framework`
 - Style: `notion` or `blueprint`
 - Density: `balanced` (3-5 images)
 
-### 4.3 Convert All Images to WebP (REQUIRED)
+**Keep each diagram under ~5 labelled elements.** Generation accuracy falls off sharply
+past that. A timeline with 4 lanes × 3 markers will come back with the lanes mislabelled;
+the same idea as 1 line + 3 markers comes back correct. Split rather than cram.
 
-**Immediately after generating each image**, convert to WebP with HIGH QUALITY settings:
+#### Verify every generated diagram before using it (REQUIRED)
+
+**`Read` each generated image back and check the content, not just the layout.** Typos in
+AI-rendered text are a known, acceptable tradeoff. Wrong numbers and inverted logic are
+not — especially in a post that argues about facts.
+
+Check, in this order:
+1. **Numbers** — does every figure match the article? (Observed failure: `400,000`
+   rendered as `4000`.)
+2. **Logic direction** — does the diagram assert the same thing the text does? (Observed
+   failure: a timeline marked the main session as *finished* before the cut-off, the exact
+   opposite of the article's point.)
+3. **Element count** — did it invent a duplicate bar/row/box?
+4. **Relative positions** — are thresholds, cut-off lines, and comparisons on the correct
+   side of each other?
+
+If any of these is wrong, **re-generate with fewer elements** rather than accepting it.
+Only then convert to WebP.
+
+**Do not write the alt text from the prompt you sent — write it from the image you got back.**
+
+### 4.4 Convert All Images to WebP (REQUIRED)
+
+**Immediately after generating each image**, convert to WebP:
 
 ```bash
-# For diagrams/infographics with text - use HIGH quality (90%) and larger width
+# For diagrams/infographics with text - HIGH quality, larger width
 npx -y sharp-cli -i input.png -o output.webp -f webp -q 90 -- resize 1600
 
-# For cover images - standard quality is fine
+# For cover images from Replicate (already WebP if using .webp extension)
+# If PNG, convert with standard quality
 npx -y sharp-cli -i input.png -o output.webp -f webp -q 88 -- resize 1200
 
 # Delete original PNG after successful conversion
@@ -249,17 +402,21 @@ rm input.png
 
 **Quality Guidelines:**
 
-| Image Type | Quality | Width | Why |
-|------------|---------|-------|-----|
-| Diagrams/Infographics | 90% | 1600px | Text must be sharp and readable |
-| Framework/Architecture | 90% | 1600px | Labels and connections must be clear |
-| Cover images | 88% | 1200px | No text, aesthetic focus |
-| Scene/Abstract | 85% | 1200px | No fine details needed |
+| Image Type | Quality | Width | Provider | Cost |
+|------------|---------|-------|----------|------|
+| Cover images (no text) | 88% | 1200px | Replicate | $0.003 |
+| Diagrams/Infographics | 90% | 1600px | Google | $0.039 |
+| Framework/Architecture | 90% | 1600px | Google | $0.039 |
+| Scene/Abstract (no text) | 85% | 1200px | Replicate | $0.003 |
 
 **Target file sizes:**
 - Cover images: < 120KB
 - Article images with text: < 200KB (quality over size)
 - Article images without text: < 150KB
+
+**Cost Example (typical post):**
+- Old: 1 cover + 3 diagrams + 1 re-roll @ $0.134 each = **$0.67**
+- New: 1 cover @ $0.003 + 4 diagrams @ $0.039 each = **$0.16** (76% savings)
 
 **Image Output Locations (all WebP):**
 - Cover image: `$BLOG_ROOT/public/covers/YYYYMMDD_[slug].webp`
@@ -293,6 +450,11 @@ Based on content, select the appropriate category:
 | Working folder | `pre-post/YYYYMMDD_[slug]/` | `pre-post/20260129_claude_code_features/` |
 
 **The full name `YYYYMMDD_[slug]` must be identical** across MDX filename, cover image, images folder, and working folder.
+
+**Pick the slug here, not earlier** — by this point the conclusion is settled, so the slug
+can describe what the article actually says. Rename the provisional `pre-post/YYYYMMDD_wip/`
+folder to match. If the thesis shifts after this point, Step 6.3 will catch it; renaming all
+four locations then is cheap as long as the post is still `published: false`.
 
 ### 5.3 Verify Images (Quick Check)
 
@@ -353,17 +515,70 @@ Cover in frontmatter:
 cover: /covers/YYYYMMDD_topic_slug.webp
 ```
 
-### 5.6 Final Checklist
+### 5.6 Mechanical Checklist
 
-Before saving, verify:
+These are the file-level checks. Narrative checks are Step 6 and are **not** optional.
+
 - [ ] Frontmatter is complete (title, date, description, category, tags, slug)
 - [ ] `published: false` is set (for review before publishing)
 - [ ] Cover image exists at `/public/covers/YYYYMMDD_[slug].webp`
 - [ ] All illustrations saved to `/public/images/YYYYMMDD_[slug]/` as WebP
 - [ ] All images are < 150KB (cover < 100KB)
 - [ ] Image paths in post are correct (`/images/YYYYMMDD_slug/filename.webp`)
-- [ ] No broken links or references
-- [ ] Writing style matches existing blog posts
+- [ ] Internal `/posts/...` links resolve to a **published** post, not a draft
+- [ ] The content parser accepts the file (e.g. `npx contentlayer build` — confirm the
+      document count went up by one, and that tables/code blocks/quotes compiled)
+
+---
+
+## Step 6: Read-Through Gate (REQUIRED before reporting done)
+
+Everything above is written and checked **section by section**. Almost every defect that
+survives to this point is a whole-document defect, invisible from inside a single section.
+
+**Read the post start to finish, once, as someone who has never seen the material.**
+Not a skim, not a grep. Then answer each of these in writing:
+
+#### 6.1 Setup before payoff
+- [ ] Every **proper noun** (your own tools, products, model names) is introduced the first
+      time it appears — one clause is enough, plus a link to an earlier post if one exists.
+- [ ] Every **number or claim that gets refuted later** was stated up front. If a section
+      opens with "顺便 / by the way / also worth noting", that is a smell: either it was
+      never set up, or it does not belong.
+- [ ] Every callback ("回到开头…", "as I said earlier") has a real antecedent.
+- [ ] Any figure/table is preceded by the premise it illustrates — what was the task, what
+      do the columns mean, what does a correct answer look like?
+
+#### 6.2 Claim fidelity (supplied-material path)
+- [ ] Re-open `facts.md`. Does the article still state the original claim with its **exact
+      scope**? Not broadened into a general truth, not narrowed. Check especially whether a
+      claim about *one named subject vs another* got flattened into a claim about the
+      category.
+- [ ] Is every number still the kind of number it was — a measurement vs a recommended
+      threshold? The rebuttal only works against the right kind.
+
+#### 6.3 Naming still matches the conclusion
+- [ ] Does the **slug** still describe what the finished article says? Slugs get chosen
+      early, when the thesis is still forming, and are never revisited. (Observed failure:
+      a slug saying "three voided probes" on an article whose text says two were voided and
+      the third stood.)
+- [ ] `YYYYMMDD_[slug]` is identical across MDX filename, cover, images folder, pre-post
+      folder. **If the slug changed, rename all four.**
+- [ ] Title, description, and H2/H3 headers agree with the conclusion.
+
+#### 6.4 Register
+- [ ] Compare against `style-spec.md`. Technical density in range — real names and numbers
+      present, each with a plain-language clause where needed.
+- [ ] No meta-commentary about the article's own rhetorical structure.
+- [ ] Section headers are descriptive, not clever.
+
+#### 6.5 Honest reporting
+- [ ] Anything you could **not** verify is stated as unverified — in the post where it
+      affects a conclusion, and to the user in your completion report.
+- [ ] If the post argues against someone, the limits of what you actually tested are stated
+      explicitly.
+- [ ] If you could not preview the rendered page, **say so plainly** rather than implying
+      it was checked.
 
 ---
 
@@ -371,22 +586,31 @@ Before saving, verify:
 
 When user invokes this skill:
 
-1. **Ask focus area** (if not specified):
+0. **Classify the source** (Step 0). Attached transcript / notes / a specific article →
+   supplied-material path: run Step 0b, then jump to Step 3. Otherwise → web path.
+
+0b. **Extract facts; confirm with AskUserQuestion only if** the article argues against a
+   claim, involves experiments/roles, or leans on specific numbers (Step 0b).
+
+1. **Ask focus area** (web path only, if not specified):
    - General AI/LLM news
    - AI Agents & Frameworks
    - Open Source Models
    - AI in Data Engineering
    - AI Research Papers
 
-2. **Run research** (Step 1)
+2. **Run research + present candidates & get selection** (Steps 1-2, web path only)
 
-3. **Present candidates & get selection** (Step 2)
+3. **Calibrate style, then draft** (Step 3) - read 4 recent posts in the target language
+   and write `style-spec.md` BEFORE the first line of prose
 
-4. **Draft post** (Step 3)
+4. **Generate cover + Illustrate** (Step 4) - cover to public/covers/, images to
+   public/images/, and `Read` every diagram back to verify numbers and logic
 
-5. **Generate cover + Illustrate** (Step 4) - Cover to public/covers/, images to public/images/
+5. **Save to posts** (Step 5) - MDX to posts/ai/[category]/, then the mechanical checklist
 
-6. **Save to posts** (Step 5) - Save MDX to posts/ai/[category]/
+6. **Read-through gate** (Step 6) - read it once end to end as a new reader. Do not skip
+   this because the sections all looked fine individually; that is exactly when it fails.
 
 7. **Report completion:**
    ```
@@ -394,10 +618,15 @@ When user invokes this skill:
    Cover: $BLOG_ROOT/public/covers/YYYYMMDD_[slug].webp
    Images: $BLOG_ROOT/public/images/YYYYMMDD_[slug]/
 
+   Verified: <parser build / link resolution / diagram fact-check>
+   NOT verified: <anything you could not check — say it plainly, e.g. "no browser preview:
+                 dev server would not start in this environment">
+
    To publish:
-   1. Review the post in your IDE or browser (pnpm dev)
+   1. Review the post in your IDE or browser (check the repo's own dev command in
+      CLAUDE.md — it may not be `pnpm dev`)
    2. Set published: true in frontmatter
-   3. Commit and push
+   3. Commit and push (only when the user asks)
    ```
 
 ---
@@ -408,9 +637,12 @@ The `image-gen` skill loads API keys from `~/.claude-skills/.env`:
 
 ```bash
 # ~/.claude-skills/.env
-GOOGLE_API_KEY=your-key-here
-# or
-OPENAI_API_KEY=your-key-here
+GOOGLE_API_KEY=your-key-here       # For diagrams/infographics with text ($0.039)
+REPLICATE_API_TOKEN=your-token     # For covers/aesthetic images ($0.003)
 ```
 
-Make sure the API key is configured before running this skill.
+**Cost optimization**: Having both keys enables two-tier provider selection:
+- Cover images (no text) → Replicate at $0.003 (13x cheaper)
+- Diagrams with text → Google at $0.039 (best text rendering)
+
+Make sure at least one API key is configured before running this skill.
