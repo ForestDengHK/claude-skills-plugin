@@ -237,18 +237,35 @@ image_count: 4
 
 Follow [references/prompt-construction.md](references/prompt-construction.md). Save to `prompts/illustration-{slug}.md`.
 
-**5.2 Select Generation Skill**
+**5.2 Two-Tier Provider Selection**
 
-**REQUIRED**: Use `image-gen` skill from this marketplace. In Codex, invoke it by name as `image-gen`. Do NOT use `web-image-gen` or other image generation skills.
+**Choose provider based on image content** for cost optimization:
+
+| Image Type | Provider | Cost | When |
+|------------|----------|------|------|
+| Has text/labels | Google (default) | $0.039 | infographic, framework, flowchart, comparison, timeline |
+| No text (aesthetic) | Replicate | $0.003 | scene, abstract, atmospheric |
+
+**REQUIRED**: Use `fd-skills:image-gen` skill. Specify `--provider replicate` for images without text.
 
 **5.3 Apply Watermark** (if enabled)
 
 Add: `Include a subtle watermark "[content]" at [position].`
 
-**5.4 Generate with High Quality**
+**5.4 Generate Images**
 
-1. Generate sequentially using `--quality 2k` for sharp output
-2. After each generation, convert to WebP for web optimization:
+1. Generate sequentially (Google uses 1K by default, sufficient for web)
+2. For text-heavy images (default - Google):
+   ```bash
+   npx -y bun ${IMAGE_GEN_SKILL_DIR}/scripts/main.ts \
+     --prompt "..." --image output.png
+   ```
+3. For aesthetic images without text (Replicate - 13x cheaper):
+   ```bash
+   npx -y bun ${IMAGE_GEN_SKILL_DIR}/scripts/main.ts \
+     --prompt "..." --image output.webp --provider replicate
+   ```
+4. After each Google PNG, convert to WebP:
    ```bash
    # For diagrams/infographics with text - HIGH quality, larger width
    npx -y sharp-cli -i input.png -o output.webp -f webp -q 90 -- resize 1600
@@ -259,15 +276,15 @@ Add: `Include a subtle watermark "[content]" at [position].`
    # Delete original PNG after conversion
    rm input.png
    ```
-3. After each: "Generated X/N"
-4. On failure: retry once, then log and continue
+5. After each: "Generated X/N"
+6. On failure: retry once, then log and continue
 
 **Quality Guidelines:**
-| Type | WebP Quality | Width | Reason |
-|------|--------------|-------|--------|
-| infographic, framework, flowchart | 90% | 1600px | Text/labels must be sharp |
-| comparison, timeline | 88% | 1400px | Some text elements |
-| scene, abstract | 85% | 1200px | No fine text details |
+| Type | Provider | WebP Quality | Width | Cost |
+|------|----------|--------------|-------|------|
+| infographic, framework, flowchart | Google | 90% | 1600px | $0.039 |
+| comparison, timeline | Google | 88% | 1400px | $0.039 |
+| scene, abstract | Replicate | 85% | 1200px | $0.003 |
 
 ---
 

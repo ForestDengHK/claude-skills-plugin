@@ -1,12 +1,20 @@
 {
   "name": "fd-skills",
   "version": "1.0.0",
-  "description": "A collection of Claude Code skills for AI image generation and article illustration",
+  "description": "A collection of Claude Code skills: AI image generation (Google/Replicate two-tier), article illustration, AI news to blog, and oral narration to memoir essays",
   "author": {
     "name": "Forest Deng",
     "email": "forest.jinying.denghk@outlook.com"
   },
   "repository": "https://github.com/ForestDengHK/claude-skills-plugin",
   "license": "MIT",
-  "keywords": ["image-generation", "article-illustration", "ai-news", "gemini", "openai"]
+  "keywords": [
+    "image-generation",
+    "article-illustration",
+    "ai-news",
+    "memoir",
+    "gemini",
+    "replicate",
+    "openai"
+  ]
 }

@@ -1,4 +1,4 @@
-export type Provider = "google" | "openai" | "dashscope";
+export type Provider = "google" | "openai" | "dashscope" | "replicate";
 export type Quality = "normal" | "2k";
 
 export type CliArgs = {

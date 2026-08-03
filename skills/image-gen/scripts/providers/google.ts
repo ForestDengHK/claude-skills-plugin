@@ -2,11 +2,18 @@ import path from "node:path";
 import { readFile } from "node:fs/promises";
 import type { CliArgs } from "../types";
 
-const GOOGLE_MULTIMODAL_MODELS = ["gemini-3-pro-image-preview", "gemini-3-flash-preview"];
+// Gemini 2.5 Flash Image is the cost-effective default ($0.039/image at 1K)
+// Gemini 3 Pro Image is premium tier ($0.134/image at 2K, $0.24 at 4K)
+const GOOGLE_MULTIMODAL_MODELS = [
+  "gemini-2.5-flash-image",           // Cost-effective default (Nano Banana)
+  "gemini-3-pro-image-preview",       // Premium for 4K/complex
+  "gemini-3-flash-preview"
+];
 const GOOGLE_IMAGEN_MODELS = ["imagen-3.0-generate-002", "imagen-3.0-generate-001"];
 
 export function getDefaultModel(): string {
-  return process.env.GOOGLE_IMAGE_MODEL || "gemini-3-pro-image-preview";
+  // Default to Gemini 2.5 Flash Image - good text rendering at lower cost
+  return process.env.GOOGLE_IMAGE_MODEL || "gemini-2.5-flash-image";
 }
 
 function normalizeGoogleModelId(model: string): string {
@@ -29,7 +36,9 @@ function getGoogleApiKey(): string | null {
 
 function getGoogleImageSize(args: CliArgs): "1K" | "2K" | "4K" {
   if (args.imageSize) return args.imageSize as "1K" | "2K" | "4K";
-  return args.quality === "2k" ? "2K" : "1K";
+  // Default to 1K for cost optimization ($0.039 vs $0.134 at 2K)
+  // 1K is sufficient for web after WebP compression to 1200-1600px
+  return "1K";
 }
 
 function getGoogleBaseUrl(): string {
@@ -141,11 +150,22 @@ async function generateWithGemini(
   }
   parts.push({ text: promptWithAspect });
 
-  const imageConfig: { imageSize: "1K" | "2K" | "4K" } = {
-    imageSize: getGoogleImageSize(args),
+  // Build generationConfig - imageConfig only supported by Gemini 3 Pro Image
+  const generationConfig: Record<string, unknown> = {
+    responseModalities: ["TEXT", "IMAGE"],
   };
 
-  console.log("Generating image with Gemini...", imageConfig);
+  // Only add imageConfig for models that support it (Gemini 3 Pro Image)
+  const normalizedModel = normalizeGoogleModelId(model);
+  if (normalizedModel.includes("gemini-3-pro-image")) {
+    const imageSize = getGoogleImageSize(args);
+    generationConfig.imageConfig = { imageSize };
+    console.log("Generating image with Gemini...", { model: normalizedModel, imageSize });
+  } else {
+    // gemini-2.5-flash-image generates 1K by default (1024x1024)
+    console.log("Generating image with Gemini...", { model: normalizedModel, imageSize: "1K (default)" });
+  }
+
   const response = await postGoogleJson<{
     candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { data?: string } }> } }>;
   }>(`${toModelPath(model)}:generateContent`, {
@@ -155,10 +175,7 @@ async function generateWithGemini(
         parts,
       },
     ],
-    generationConfig: {
-      responseModalities: ["IMAGE"],
-      imageConfig,
-    },
+    generationConfig,
   });
   console.log("Generation completed.");
 
